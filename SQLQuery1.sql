@@ -24,7 +24,7 @@ INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situa
 ('Christian Kevelyn', '53610828803', '2003-02-28', NULL, '2020-02-15', 1),
 ('Neymar Junior', '12345678901', '2009-08-20', NULL, '2021-03-16', 1),
 ('Lionel Messi', '98765432198', '1990-04-10', NULL, '2022-04-14', 1),				
-('Cristiano Ronaldo', '14785236974', '1980-05-12', NULL, '2023-06-12', 1);			/*testar dataultimacompra*/
+('Cristiano Ronaldo', '14785236974', '1980-05-12', NULL, '2023-06-12', 1);			
 
 SELECT * FROM Clientes;
 
@@ -121,10 +121,10 @@ SELECT * FROM CategoriasMed
 				/*ValorTotal = Soma de TotalItemVenda*/
 INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES	/*Atributo idCliente sendo informado*/
 
-(2, '2025-01-10', NULL),
-(3, '2025-02-11', NULL),
-(4, '2025-03-12', NULL),					
-(5, '2025-04-13', NULL);
+(2, '2025-02-10', NULL),
+(3, '2025-03-11', NULL),
+(4, '2025-04-12', NULL),					
+(5, '2025-05-13', NULL);
 
 SELECT * FROM Vendas;
 
@@ -146,10 +146,10 @@ SELECT * FROM ItensVendas
 						/*ValorTotal = Soma TotalItemCompra*/
 INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES	/*Atributo IdFornecedor sendo atribuido aqui*/
 
-(3, '2025-01-10', NULL),
-(4, '2025-02-11', NULL),
-(5, '2025-03-12', NULL),				
-(6, '2025-04-13', NULL);
+(3, '2025-10-10', NULL),
+(4, '2025-09-11', NULL),
+(5, '2025-08-12', NULL),				
+(6, '2025-07-13', NULL);
 
 SELECT * FROM Compras;
 
@@ -187,3 +187,29 @@ INSERT INTO ItensProducoes (idProducao, idPrincipioAt, Quantidade) VALUES	/*Atri
 (4, 4, 5);
 
 SELECT * FROM ItensProducoes;
+
+/* ================================ATUALIZAR DATA DA ULTIMA COMPRA DO CLIENTE======================= */
+
+CREATE TRIGGER trg_AtualizaUltimaCompra		/*Rotina executada automaticamente*/
+ON Vendas									/*sempre que ocorrer INSERT, UPDATE OU DELETE na tabela Vendas, a TRIGGER podera ser executada*/
+AFTER INSERT								/*TRIGGER sera executada "depois" da "inserção"*/
+AS BEGIN									/*Inicio do código que sera executado quando a TRIGGER for disparada*/
+    UPDATE Clientes							/*Atualiza a tabela Clientes*/
+    SET DataUltimaCompra = i.DataVenda		/*DataUltimaCompra será atualizado com a DataVenda vinda da tabela virtual "inserted"*/
+    FROM Clientes c
+    JOIN inserted i ON c.idCliente = i.idCliente; /*liga a tabela inserted com a tabela cliente, e por fim atualize apenas o cliente que fez a venda*/
+END;												 /*e por fim atualize apenas o cliente que fez a venda*/
+GO
+
+/* ================================ATUALIZAR ULTIMO FORNECIMENTO DO FORNECEDOR======================= */
+
+CREATE TRIGGER trg_AtualizaUltimoFornecimento
+ON Compras
+AFTER INSERT
+AS BEGIN
+    UPDATE Fornecedores
+    SET UltimoFornecimento = i.DataCompra
+    FROM Fornecedores f
+    JOIN inserted i ON f.idFornecedor = i.idFornecedor;
+END;
+GO
