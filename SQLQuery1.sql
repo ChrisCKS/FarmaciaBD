@@ -3,7 +3,7 @@
 INSERT INTO ClientesRestritos (idCliente, CPF) VALUES
 
 (2, '12345678901'),
-(4, '14785236974');
+(4, '14785236974');							--AINDA NAO MEXI
 
 SELECT * FROM CientesRestritos;
 
@@ -11,7 +11,7 @@ SELECT * FROM CientesRestritos;
 
 INSERT INTO FornecedoresRestritos (idFornecedor, CNPJ) VALUES
 
-(2, '98765432000111'),
+(2, '98765432000111'),						--AINDA NAO MEXI
 (5, '35795184200016');
 
 SELECT * FROM FornecedoresRestritos;
@@ -23,7 +23,7 @@ INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situa
 
 ('Christian Kevelyn', '53610828803', '2003-02-28', NULL, '2020-02-15', 1),
 ('Neymar Junior', '12345678901', '2009-08-20', NULL, '2021-03-16', 1),
-('Lionel Messi', '98765432198', '1990-04-10', NULL, '2022-04-14', 1),				----------OK----------	
+('Lionel Messi', '98765432198', '1990-04-10', NULL, '2022-04-14', 1),				
 ('Cristiano Ronaldo', '14785236974', '1980-05-12', NULL, '2023-06-12', 1);			/*testar dataultimacompra*/
 
 SELECT * FROM Clientes;
@@ -32,7 +32,7 @@ SELECT * FROM Clientes;
 
 INSERT INTO SituacaoClientes (Situacao) VALUES
 ('A'),
-('I');												----------OK----------				
+('I');															
 
 SELECT * FROM SituacaoClientes
 
@@ -41,7 +41,7 @@ SELECT * FROM SituacaoClientes
 INSERT INTO Telefones (idCliente, CodPais, CodArea, Numero) VALUES
 (2, 55, 16, '999929938'),
 (3, 55, 11, '997894561'),
-(4, 55, 19, '991234567'),
+(4, 55, 19, '991234567'),									
 (5, 55, 13, '991597538');
 
 SELECT * FROM Telefones
@@ -52,7 +52,7 @@ INSERT INTO Fornecedores (CNPJ, RazaoSocial, Pais, DataAbertura, Situacao, Ultim
 
 ('12345678000199', 'MedicinaSaude', 'Brasil', '2015-02-15', 1, NULL , '2018-04-02'),
 ('98765432000111', 'MaisSaude', 'Brasil', '2016-03-16', 1, NULL, '2019-05-14'),
-('96385214000178', 'DrogariaMedicinal', 'Brasil', '2019-10-08', 1, NULL, '2020-06-27'),
+('96385214000178', 'DrogariaMedicinal', 'Brasil', '2019-10-08', 1, NULL, '2020-06-27'),				
 ('74185296000133', 'RemediariaMais', 'Brasil', '2018-02-14', 1, NULL, '2020-06-27'),
 ('35795184200016', 'DrogariaSaude', 'Brasil', '2017-08-22', 1, NULL, '2020-06-27');
 
@@ -60,9 +60,9 @@ SELECT * FROM Fornecedores;
 
 ------------------------------------------------------SITUAÇÃO FORNECEDOR------------------------------------------------------
 
-INSERT INTO SituacaoFornecedores (id, Situacao) VALUES
-(1, 'A'),
-(2, 'I');
+INSERT INTO SituacaoFornecedores (Situacao) VALUES
+('A'),
+('I');																					
 
 SELECT * FROM SituacaoFornecedores
 
@@ -72,46 +72,46 @@ INSERT INTO PrincipiosAtivo (Nome, Situacao, DataUltimaCompra, DataCadastro) VAL
 
 ('Principio1', 1, NULL, '2015-02-20'),
 ('Principio2', 1, NULL, '2016-03-21'),
-('Principio3', 1, NULL, '2017-04-22'),
+('Principio3', 1, NULL, '2017-04-22'),									
 ('Principio4', 1, NULL, '2018-05-23');
 
 SELECT * FROM PrincipiosAtivo;
 
 -------------------------------------------------SITUAÇÃO PRICIPIOS ATIVO------------------------------------------------------
 
-INSERT INTO SituacaoPrincipiosAtivo (id, Situacao) VALUES
-(1, 'A'),
-(2, 'I');
+INSERT INTO SituacaoPrincipiosAtivo (Situacao) VALUES
+('A'),
+('I');															
 
-SELECT * FROM SituacaPrincipioAtivo
+SELECT * FROM SituacaoPrincipiosAtivo
 
 ------------------------------------------------------MEDICAMENTOS------------------------------------------------------			
 
 							/*ValorVenda = ValorUnitario*/	/*UltimaVenda = DataVenda Venda*/
 INSERT INTO Medicamentos (CDB, ValorVenda, Nome, UltimaVenda, DataCadastro, Situacao, Categoria) VALUES
 
-('1472583691598', '25.00', 'Nelsaldina', NULL, '2010-10-30', 1, 'A'),
-('1597536984562', '50.00', 'Paracetamol', NULL, '2011-09-29', 1, 'B'),
-('78963214753951', '100.00', 'Dorflex', NULL, '2011-08-28', 1, 'I'),
-('36987412357951', '200.00', 'Dramim', NULL, '2011-07-27', 1, 'V');
+('1472583691598', '25.00', 'Nelsaldina', NULL, '2010-10-30', 1, 1),				
+('1597536984562', '50.00', 'Paracetamol', NULL, '2011-09-29', 1, 2),	/*pensar em trazer as siglas e não os Ids de sitaçao e categorias*/
+('7896321475395', '100.00', 'Dorflex', NULL, '2011-08-28', 1, 3),
+('3698741235795', '200.00', 'Dramim', NULL, '2011-07-27', 1, 4);
 
 SELECT * FROM Medicamentos;
 
 ------------------------------------------------------SITUAÇÃO MEDICAMENTO------------------------------------------------------
 
-INSERT INTO SituacaoMed (id, Situacao) VALUES
-(1, 'A'),
-(2, 'I');
+INSERT INTO SituacaoMed (Situacao) VALUES
+('A'),
+('I');												
 
 SELECT * FROM SituacaoMed
 
 ------------------------------------------------------CATEGORIA DO MEDICAMENTO------------------------------------------------
 
-INSERT INTO CategoriasMed (id, Categoria) VALUES
-(1, 'A'),
-(2, 'B'),
-(3, 'I'),
-(4, 'V');
+INSERT INTO CategoriasMed (Categoria) VALUES
+('A'),
+('B'),
+('I'),											
+('V');
 
 SELECT * FROM CategoriasMed
 
@@ -121,48 +121,48 @@ SELECT * FROM CategoriasMed
 				/*ValorTotal = Soma de TotalItemVenda*/
 INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES	/*Atributo idCliente sendo informado*/
 
-(1, '2025-01-10', NULL),
-(2, '2025-02-11', NULL),
-(3, '2025-03-12', NULL),
-(2, '2025-04-13', NULL);
+(2, '2025-01-10', NULL),
+(3, '2025-02-11', NULL),
+(4, '2025-03-12', NULL),					
+(5, '2025-04-13', NULL);
 
 SELECT * FROM Vendas;
 
 ----------------------------------------------------ITENS VENDA------------------------------------------------------	
 
 /*ValorUnitario = ValorVenda Medicamento*/ /*TotalItem = Qntd * ValorUnitario*/
-INSERT INTO ItensVenda (Quantidade, idVenda, CDB, ValorUnitario, TotalItem) VALUES
+INSERT INTO ItensVendas (Quantidade, idVenda, CDB, ValorUnitario) VALUES
 /*idVenda e CDB sendo trazidos*/
 
-(2, 1, '1472583691598', NULL, NULL), 
-(3, 2, '1597536984562', NULL, NULL),
-(4, 3, '78963214753951', NULL, NULL),
-(5, 4, '36987412357951', NULL, NULL);
+(2, 1, '1472583691598', NULL),			
+(3, 2, '1597536984562', NULL),
+(4, 3, '7896321475395', NULL),			/*TotalItem esta como NULL pois o valorUnitario precisa vim de valor venda*/
+(5, 4, '3698741235795', NULL);
 
-SELECT * FROM ItensVenda VALUES
+SELECT * FROM ItensVendas
 
 ------------------------------------------------------COMPRAS------------------------------------------------------
 
 						/*ValorTotal = Soma TotalItemCompra*/
 INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES	/*Atributo IdFornecedor sendo atribuido aqui*/
 
-(1, '2025-01-10', NULL),
-(2, '2025-02-11', NULL),
-(3, '2025-03-12', NULL),
-(4, '2025-04-13', NULL);
+(3, '2025-01-10', NULL),
+(4, '2025-02-11', NULL),
+(5, '2025-03-12', NULL),				
+(6, '2025-04-13', NULL);
 
 SELECT * FROM Compras;
 
 ---------------------------------------------------ITENS DE COMPRA---------------------------------------------------	
 
 /*TotalItem = Quantidade * ValorUnitario*/
-INSERT INTO ItensCompras (idCompra, idPrincipioAt, Quantidade, ValorUnitario, TotalItem) VALUES
+INSERT INTO ItensCompras (idCompra, idPrincipioAt, Quantidade, ValorUnitario) VALUES
 /*Atributo IdCompra sendo atribuido aqui, IdPrincipioAtivo Tambem*/
 
-(1, 1, 2, '5.00', NULL),
-(2, 2, 3, '10.00', NULL),
-(3, 3, 4, '20.00', NULL),
-(4, 4, 5, '30.00', NULL);
+(1, 1, 2, '5.00'),
+(2, 2, 3, '10.00'),				
+(3, 3, 4, '20.00'),				/*Aqui total item ja está calculando*/
+(4, 4, 5, '30.00');
 
 SELECT * FROM ItensCompras;
 
@@ -172,8 +172,8 @@ INSERT INTO Producoes (DataProducao, CDB, Quantidade) VALUES	/*CDB sendo trazido
 
 ('2025-01-01', '1472583691598', 5),
 ('2025-02-02', '1597536984562', 10),
-('2025-03-03', '78963214753951', 15),
-('2025-02-02', '36987412357951', 20);
+('2025-03-03', '7896321475395', 15),						
+('2025-02-02', '3698741235795', 20);
 
 SELECT * FROM Producoes;
 
