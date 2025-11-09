@@ -216,7 +216,7 @@ GO
 
 /* ================================NAO PODE COMPRAR DE FORNECEDOR BLOQUEADO OU INATIVO======================= */
 
-CREATE TRIGGER trg_Fornecedor_RestritoCompra
+CREATE TRIGGER trg_Fornecedor_RestritoInativoCompra
 ON Compras
 INSTEAD OF INSERT                                                               /*quando executa um INSERT em Compras, o codigo do trigger é executado no lugar do INSERT original*/
 AS BEGIN
@@ -250,9 +250,9 @@ END;
     END;
 
 
-/* ================================CLIENTE BLOQUEADO NÃO PODE COMPRAR======================= */
+/* ================================CLIENTE BLOQUEADO OU INATIVO NÃO PODE COMPRAR======================= */
 
-CREATE TRIGGER trg_Cliente_RestritoVenda
+CREATE TRIGGER trg_Cliente_RestritoInativoVenda
 ON Vendas
 INSTEAD OF INSERT
 AS
@@ -286,4 +286,102 @@ END;
         ROLLBACK TRANSACTION;
         THROW 50021, 'Cliente inativo — não é possível registrar venda.', 1;
     END;
+
+
+    /* ================================PRINCIPIO ATIVO "INATIVO" EM COMPRA======================= */
+
+CREATE TRIGGER trg_PrincipioInativo_Compra
+ON ItensCompras
+INSTEAD OF INSERT
+AS BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN PrincipiosAtivo p ON p.idPrincipioAt = i.idPrincipioAt
+        JOIN SituacaoPrincipiosAtivo s ON p.Situacao = s.id
+        WHERE s.Situacao = 'I'
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50012, 'O Princípio ativo esta como inativo — não pode ser comprado.', 1;
+    END;
+
+    INSERT INTO ItensCompras (idCompra, idPrincipioAt, Quantidade, ValorUnitario)
+    SELECT idCompra, idPrincipioAt, Quantidade, ValorUnitario
+    FROM inserted;
+END;
+GO
+
+/* ================================PRINCIPIO ATIVO "INATIVO" EM PRODUÇÃO======================= */
+
+CREATE TRIGGER trg_PrincipioInativo_Producao
+ON ItensProducoes
+INSTEAD OF INSERT
+AS BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN PrincipiosAtivo p ON p.idPrincipioAt = i.idPrincipioAt
+        JOIN SituacaoPrincipiosAtivo s ON p.Situacao = s.id
+        WHERE s.Situacao = 'I'
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50013, 'Princípio ativo esta como inativo — não pode ser usado na produção.', 1;
+    END;
+
+    INSERT INTO ItensProducoes (idProducao, idPrincipioAt, Quantidade)
+    SELECT idProducao, idPrincipioAt, Quantidade
+    FROM inserted;
+END;
+GO
+
+    /* ================================MEDICAMENTO "INATIVO" EM VENDA======================= */
+
+CREATE TRIGGER trg_Medicamento_Inativo_Venda
+ON ItensVendas
+INSTEAD OF INSERT
+AS BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN Medicamentos m ON m.CDB = i.CDB
+        JOIN SituacaoMed s ON m.Situacao = s.id
+        WHERE s.Situacao = 'I'
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50014, 'Medicamento inativo — não pode ser vendido.', 1;
+    END;
+
+    INSERT INTO ItensVendas (Quantidade, idVenda, CDB, ValorUnitario)
+    SELECT Quantidade, idVenda, CDB, ValorUnitario
+    FROM inserted;
+END;
+GO
+
+/* ================================MEDICAMENTO "INATIVO" EM PRODUÇÃO======================= */
+
+CREATE TRIGGER trg_Medicamento_Inativo_Producao
+ON Producoes
+INSTEAD OF INSERT
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN Medicamentos m ON m.CDB = i.CDB
+        JOIN SituacaoMed s ON m.Situacao = s.id
+        WHERE s.Situacao = 'I'
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50015, 'Medicamento inativo — não pode ser produzido.', 1;
+    END;
+
+    INSERT INTO Producoes (DataProducao, CDB, Quantidade)
+    SELECT DataProducao, CDB, Quantidade
+    FROM inserted;
+END;
+GO
 
