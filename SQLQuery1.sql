@@ -229,12 +229,7 @@ AS BEGIN
     BEGIN                                                                          /*quando a condição for verdadeira:*/
         ROLLBACK TRANSACTION;                                                      /*aqui ele cancela a transação, se a compra estiver sendo feita com fornecedor bloq*/
         THROW 50001, 'Fornecedor bloqueado — compra não permitida.', 1;
-    END
-
-    INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal)                      /*se o fornecdor nao estava bloq, executa normalmente*/
-    SELECT idFornecedor, DataCompra, ValorTotal                                     /*pega os dados da tabela virtual que foram inseridos e insere na tabela real*/
-    FROM inserted;
-END;
+    END;
 
 --- Verifica se o fornecedor está inativo---
     IF EXISTS (
@@ -249,14 +244,18 @@ END;
         THROW 50023, 'Fornecedor inativo — não é possível registrar compra.', 1;
     END;
 
+    INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal)                      /*se o fornecdor nao estava bloq, executa normalmente*/
+    SELECT idFornecedor, DataCompra, ValorTotal                                     /*pega os dados da tabela virtual que foram inseridos e insere na tabela real*/
+    FROM inserted;
+END;
+GO
 
 /* ================================CLIENTE BLOQUEADO OU INATIVO NÃO PODE COMPRAR======================= */
 
 CREATE TRIGGER trg_Cliente_RestritoInativoVenda
 ON Vendas
 INSTEAD OF INSERT
-AS
-BEGIN
+AS BEGIN
 --- Verifica se o cliente está bloq---
     IF EXISTS (
         SELECT 1
@@ -264,15 +263,10 @@ BEGIN
         JOIN ClientesRestritos r ON r.idCliente = i.idCliente
     )
     BEGIN
-        RAISERROR('Cliente restrito — venda não permitida.', 16, 1);
         ROLLBACK TRANSACTION;
+        THROW 50020, 'Cliente restrito — venda não permitida.', 1;
         RETURN;
-    END
-
-    INSERT INTO Vendas (idCliente, DataVenda, ValorTotal)
-    SELECT idCliente, DataVenda, ValorTotal
-    FROM inserted;
-END;
+    END;
 
 --- Verifica se o cliente está inativo---
     IF EXISTS (
@@ -285,8 +279,14 @@ END;
     BEGIN
         ROLLBACK TRANSACTION;
         THROW 50021, 'Cliente inativo — não é possível registrar venda.', 1;
+        RETURN;
     END;
-
+    
+    INSERT INTO Vendas (idCliente, DataVenda, ValorTotal)
+    SELECT idCliente, DataVenda, ValorTotal
+    FROM inserted;
+END;
+GO
 
     /* ================================PRINCIPIO ATIVO "INATIVO" EM COMPRA======================= */
 
@@ -365,8 +365,7 @@ GO
 CREATE TRIGGER trg_Medicamento_Inativo_Producao
 ON Producoes
 INSTEAD OF INSERT
-AS
-BEGIN
+AS BEGIN
     IF EXISTS (
         SELECT 1
         FROM inserted i
