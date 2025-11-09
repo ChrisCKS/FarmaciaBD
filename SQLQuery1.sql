@@ -2,8 +2,8 @@
 
 INSERT INTO ClientesRestritos (idCliente, CPF) VALUES
 
-(2, '12345678901'),
-(4, '14785236974');							--AINDA NAO MEXI
+(2),
+(4);							--AINDA NAO MEXI
 
 SELECT * FROM CientesRestritos;
 
@@ -11,8 +11,8 @@ SELECT * FROM CientesRestritos;
 
 INSERT INTO FornecedoresRestritos (idFornecedor, CNPJ) VALUES
 
-(2, '98765432000111'),						--AINDA NAO MEXI
-(5, '35795184200016');
+(2),						--AINDA NAO MEXI
+(5);
 
 SELECT * FROM FornecedoresRestritos;
 
@@ -139,7 +139,7 @@ INSERT INTO ItensVendas (Quantidade, idVenda, CDB, ValorUnitario) VALUES
 (4, 3, '7896321475395', NULL),			/*TotalItem esta como NULL pois o valorUnitario precisa vim de valor venda*/
 (5, 4, '3698741235795', NULL);
 
-SELECT * FROM ItensVendas
+SELECT * FROM ItensVendas c
 
 ------------------------------------------------------COMPRAS------------------------------------------------------
 
@@ -213,3 +213,77 @@ AS BEGIN
     JOIN inserted i ON f.idFornecedor = i.idFornecedor;
 END;
 GO
+
+/* ================================NAO PODE COMPRAR DE FORNECEDOR BLOQUEADO OU INATIVO======================= */
+
+CREATE TRIGGER trg_Fornecedor_RestritoCompra
+ON Compras
+INSTEAD OF INSERT                                                               /*quando executa um INSERT em Compras, o codigo do trigger é executado no lugar do INSERT original*/
+AS BEGIN
+--- Verifica se o fornecedor está bloq---
+    IF EXISTS (                                                                  /*se existir pelo menos 1 registro que satisfaça a consulta interna*/
+        SELECT 1                                                                 /*somente para checar existência*/
+        FROM inserted i                                                          /*tabela virtual criada que contes o que foi enviado do INSERT */
+        JOIN FornecedoresRestritos r ON r.idFornecedor = i.idFornecedor             /*junta as linhas de INSERTED com a tabela de restritos*/
+    )
+    BEGIN                                                                          /*quando a condição for verdadeira:*/
+        ROLLBACK TRANSACTION;                                                      /*aqui ele cancela a transação, se a compra estiver sendo feita com fornecedor bloq*/
+        THROW 50001, 'Fornecedor bloqueado — compra não permitida.', 1;
+    END
+
+    INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal)                      /*se o fornecdor nao estava bloq, executa normalmente*/
+    SELECT idFornecedor, DataCompra, ValorTotal                                     /*pega os dados da tabela virtual que foram inseridos e insere na tabela real*/
+    FROM inserted;
+END;
+
+--- Verifica se o fornecedor está inativo---
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN Fornecedores f ON f.idFornecedor = i.idFornecedor
+        JOIN SituacaoFornecedores s ON f.Situacao = s.id
+        WHERE s.Situacao = 'I'
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50023, 'Fornecedor inativo — não é possível registrar compra.', 1;
+    END;
+
+
+/* ================================CLIENTE BLOQUEADO NÃO PODE COMPRAR======================= */
+
+CREATE TRIGGER trg_Cliente_RestritoVenda
+ON Vendas
+INSTEAD OF INSERT
+AS
+BEGIN
+--- Verifica se o cliente está bloq---
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN ClientesRestritos r ON r.idCliente = i.idCliente
+    )
+    BEGIN
+        RAISERROR('Cliente restrito — venda não permitida.', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    INSERT INTO Vendas (idCliente, DataVenda, ValorTotal)
+    SELECT idCliente, DataVenda, ValorTotal
+    FROM inserted;
+END;
+
+--- Verifica se o cliente está inativo---
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN Clientes c ON c.idCliente = i.idCliente
+        JOIN SituacaoClientes s ON c.Situacao = s.id
+        WHERE s.Situacao = 'I'
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50021, 'Cliente inativo — não é possível registrar venda.', 1;
+    END;
+
