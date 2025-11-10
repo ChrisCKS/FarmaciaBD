@@ -593,30 +593,6 @@ AS BEGIN
 END;
 GO
 
-/* ================================PRINCIPIO ATIVO "INATIVO" EM COMPRA======================= */
-
-CREATE TRIGGER trg_PrincipioInativo_Compra
-ON ItensCompras
-INSTEAD OF INSERT
-AS BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM inserted i
-        JOIN PrincipiosAtivo p ON p.idPrincipioAt = i.idPrincipioAt
-        JOIN SituacaoPrincipiosAtivo s ON p.Situacao = s.id
-        WHERE s.Situacao = 'I'
-    )
-    BEGIN
-        ROLLBACK TRANSACTION;
-        THROW 50012, 'O Princípio ativo esta como inativo — não pode ser comprado.', 1;
-    END;
-
-    INSERT INTO ItensCompras (idCompra, idPrincipioAt, Quantidade, ValorUnitario)
-    SELECT idCompra, idPrincipioAt, Quantidade, ValorUnitario
-    FROM inserted;
-END;
-GO
-
 /* ================================PRINCIPIO ATIVO "INATIVO" EM PRODUÇÃO======================= */
 
 CREATE TRIGGER trg_PrincipioInativo_Producao
