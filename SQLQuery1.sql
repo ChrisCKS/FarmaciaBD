@@ -48,7 +48,10 @@ INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situa
 ('Christian Kevelyn', '53610828803', '2003-02-28', NULL, '2020-02-15', 2),
 ('Neymar Junior', '12345678901', '2009-08-20', NULL, '2021-03-16', 1),
 ('Lionel Messi', '98765432198', '1990-04-10', NULL, '2022-04-14', 1),				
-('Cristiano Ronaldo', '14785236974', '1980-05-12', NULL, '2023-06-12', 1);			
+('Cristiano Ronaldo', '14785236974', '1980-05-12', NULL, '2023-06-12', 1);		
+
+INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situacao) VALUES
+('Everton Tiru', '53610822694', '2001-07-22', NULL, '2025-11-09', 1);
 
 SELECT * FROM Clientes;
 
@@ -78,7 +81,7 @@ SELECT * FROM Fornecedores;
 
 INSERT INTO ClientesRestritos (idCliente) VALUES
 
-(2);							
+(5);							
 
 SELECT * FROM ClientesRestritos;
 
@@ -86,7 +89,7 @@ SELECT * FROM ClientesRestritos;
 
 INSERT INTO FornecedoresRestritos (idFornecedor) VALUES
 
-(1);			
+(3);			
 
 SELECT * FROM FornecedoresRestritos;
 
@@ -126,6 +129,9 @@ INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES    /*Cliente INATIV
 INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES    /*Cliente menor de idade*/
 (2, '2025-02-10', NULL);
 
+INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES    /*Cliente Restrito*/
+(5, '2025-08-20', NULL);
+
 SELECT * FROM Vendas;
 
 ----------------------------------------------------ITENS VENDA------------------------------------------------------	
@@ -135,12 +141,11 @@ INSERT INTO ItensVendas (Quantidade, idVenda, CDB, ValorUnitario) VALUES
 /*idVenda e CDB sendo trazidos*/
 
 (2, 1, '1472583691598', NULL),	
-(3, 2, '1597536984562', NULL),  
-(4, 2, '7896321475395', NULL);	/*TotalItem esta como NULL pois o valorUnitario precisa vim de valor venda*/
+(3, 2, '1597536984562', NULL),
+(3, 2, '7896321475395', NULL);	/*TotalItem esta como NULL pois o valorUnitario precisa vim de valor venda*/
 
 INSERT INTO ItensVendas (Quantidade, idVenda, CDB, ValorUnitario) VALUES
 (5, 4, '3698741235795', NULL);      /*Medicamento Inativo*/
-        
 
 SELECT * FROM ItensVendas
 
@@ -154,13 +159,13 @@ INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES	/*Atributo IdF
 (4, '2025-09-15', NULL);
 
 INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES
-(1, '2025-06-20', NULL);    /*RESTRITO*/
+(3, '2025-06-20', NULL);    /*RESTRITO*/
 
 INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES
 (2, '2025-07-13', NULL);  /*INATIVO*/
 
 INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES
-(3, '2025-10-10', NULL); /*MENOS DE 2 ANOS DE ABERTURA*/
+(1, '2025-10-10', NULL); /*MENOS DE 2 ANOS DE ABERTURA*/
 
 SELECT * FROM Compras;
 
