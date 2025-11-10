@@ -2,6 +2,8 @@
 CREATE DATABASE SneezePharma;
 GO
 
+DROP DATABASE SneezePharma;
+
 USE SneezePharma
 GO
 

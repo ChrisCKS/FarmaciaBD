@@ -1,18 +1,44 @@
-----------------------------------------------CLIENTES RESTRITOS-----------------------------------------------
+------------------------------------------------------SITUA플O CLIENTE------------------------------------------------------
 
-INSERT INTO ClientesRestritos (idCliente) VALUES
+INSERT INTO SituacaoClientes (Situacao) VALUES
+('A'),
+('I');															
 
-(2);							
+SELECT * FROM SituacaoClientes
 
-SELECT * FROM ClientesRestritos;
+------------------------------------------------------SITUA플O FORNECEDOR------------------------------------------------------
 
-----------------------------------------------FORNECEDORES RESTRITOS-----------------------------------------------
+INSERT INTO SituacaoFornecedores (Situacao) VALUES
+('A'),
+('I');																					
 
-INSERT INTO FornecedoresRestritos (idFornecedor) VALUES
+SELECT * FROM SituacaoFornecedores
 
-(1);			
+-------------------------------------------------SITUA플O PRICIPIOS ATIVO------------------------------------------------------
 
-SELECT * FROM FornecedoresRestritos;
+INSERT INTO SituacaoPrincipiosAtivo (Situacao) VALUES
+('A'),
+('I');															
+
+SELECT * FROM SituacaoPrincipiosAtivo
+
+------------------------------------------------------SITUA플O MEDICAMENTO------------------------------------------------------
+
+INSERT INTO SituacaoMed (Situacao) VALUES
+('A'),
+('I');												
+
+SELECT * FROM SituacaoMed
+
+------------------------------------------------------CATEGORIA DO MEDICAMENTO------------------------------------------------
+
+INSERT INTO CategoriasMed (Categoria) VALUES
+('A'),
+('B'),
+('I'),											
+('V');
+
+SELECT * FROM CategoriasMed
 
 ------------------------------------------------------CLIENTES------------------------------------------------------
 											
@@ -25,14 +51,6 @@ INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situa
 ('Cristiano Ronaldo', '14785236974', '1980-05-12', NULL, '2023-06-12', 1);			
 
 SELECT * FROM Clientes;
-
-------------------------------------------------------SITUA플O CLIENTE------------------------------------------------------
-
-INSERT INTO SituacaoClientes (Situacao) VALUES
-('A'),
-('I');															
-
-SELECT * FROM SituacaoClientes
 
 ------------------------------------------------------TELEFONE------------------------------------------------------
 
@@ -54,19 +72,23 @@ INSERT INTO Fornecedores (CNPJ, RazaoSocial, Pais, DataAbertura, Situacao, Ultim
 ('74185296000133', 'RemediariaMais', 'Brasil', '2018-02-14', 1, NULL, '2020-06-27'),
 ('35795184200016', 'DrogariaSaude', 'Brasil', '2017-08-22', 1, NULL, '2020-06-27');
 
-UPDATE Fornecedores
-SET DataAbertura = '2024-02-15'
-WHERE idFornecedor = 3;
-
 SELECT * FROM Fornecedores;
 
-------------------------------------------------------SITUA플O FORNECEDOR------------------------------------------------------
+----------------------------------------------CLIENTES RESTRITOS-----------------------------------------------
 
-INSERT INTO SituacaoFornecedores (Situacao) VALUES
-('A'),
-('I');																					
+INSERT INTO ClientesRestritos (idCliente) VALUES
 
-SELECT * FROM SituacaoFornecedores
+(2);							
+
+SELECT * FROM ClientesRestritos;
+
+----------------------------------------------FORNECEDORES RESTRITOS-----------------------------------------------
+
+INSERT INTO FornecedoresRestritos (idFornecedor) VALUES
+
+(1);			
+
+SELECT * FROM FornecedoresRestritos;
 
 ------------------------------------------------------PRINCIPIOS ATIVOS------------------------------------------------------
 										/*DataUltimaCompra = DataCompra Comora*/
@@ -79,14 +101,6 @@ INSERT INTO PrincipiosAtivo (Nome, Situacao, DataUltimaCompra, DataCadastro) VAL
 
 SELECT * FROM PrincipiosAtivo;
 
--------------------------------------------------SITUA플O PRICIPIOS ATIVO------------------------------------------------------
-
-INSERT INTO SituacaoPrincipiosAtivo (Situacao) VALUES
-('A'),
-('I');															
-
-SELECT * FROM SituacaoPrincipiosAtivo
-
 ------------------------------------------------------MEDICAMENTOS------------------------------------------------------			
 
 							/*ValorVenda = ValorUnitario*/	/*UltimaVenda = DataVenda Venda*/
@@ -98,25 +112,6 @@ INSERT INTO Medicamentos (CDB, ValorVenda, Nome, UltimaVenda, DataCadastro, Situ
 ('3698741235795', '200.00', 'Dramim', NULL, '2011-07-27', 2, 4);
 
 SELECT * FROM Medicamentos;
-
-------------------------------------------------------SITUA플O MEDICAMENTO------------------------------------------------------
-
-INSERT INTO SituacaoMed (Situacao) VALUES
-('A'),
-('I');												
-
-SELECT * FROM SituacaoMed
-
-------------------------------------------------------CATEGORIA DO MEDICAMENTO------------------------------------------------
-
-INSERT INTO CategoriasMed (Categoria) VALUES
-('A'),
-('B'),
-('I'),											
-('V');
-
-SELECT * FROM CategoriasMed
-
 
 ------------------------------------------------------VENDAS------------------------------------------------------
 
