@@ -355,14 +355,15 @@ ON ItensVendas
 AFTER INSERT
 AS BEGIN
     SET NOCOUNT ON;
-    IF EXISTS (SELECT 1
-        FROM ItensVendas iv
-        JOIN inserted i ON iv.idVenda = i.idVenda
-        GROUP BY iv.idVenda
-        HAVING COUNT(iv.idVenda) > 3
+    IF EXISTS (SELECT 1                  /*retorna verdadeiro se houver pelo menos uma venda que, após o INSERT,tenha mais de 3 itens.*/
+        FROM ItensVendas iv              /*junta a tabela ItensVendas*/
+        JOIN inserted i                 /*com as linhas recem inseridas na tabela virtual inserted*/
+        ON iv.idVenda = i.idVenda       /*agrupando por idVenda*/
+        GROUP BY iv.idVenda             /*agrupa resultados por cada venda*/
+        HAVING COUNT(iv.idVenda) > 3    /*filtra vendas cuja quantidade de itens seja maior que 3.*/
     )
     BEGIN
-	    ROLLBACK TRANSACTION;
+	    ROLLBACK TRANSACTION;           /*desfaz toda a transação*/
         THROW 51001, 'Uma venda n�o pode conter mais de 3 itens.', 1;
     END;
 END;
@@ -370,16 +371,16 @@ GO
 
 CREATE TRIGGER Trg_PreencherValorTotaldaVenda
 ON ItensVendas
-AFTER INSERT, UPDATE
+AFTER INSERT, UPDATE        /*Dispara com uma inserção ou atualização*/
 AS BEGIN
     SET NOCOUNT ON;
-    UPDATE v
-    SET v.ValorTotal = (SELECT SUM(iv.TotalItem)
+    UPDATE v                                        /*indica que a prox operação sera uma atualização na tabela vemdas(v)*/
+    SET v.ValorTotal = (SELECT SUM(iv.TotalItem)    /*Recalcula o ValorTotal*/ /*atribui a soma dos itens(TotalItem)*/
         FROM ItensVendas iv
-        WHERE iv.idVenda = v.idVenda
+        WHERE iv.idVenda = v.idVenda                /*daquela venda específica*/
     )
-    FROM Vendas v
-    JOIN (SELECT DISTINCT idVenda
+    FROM Vendas v                               /*especifica que a alteração sera feita nesta tabela*/
+    JOIN (SELECT DISTINCT idVenda               /*DISTINCT evita duplicatas*/
 	FROM inserted
     ) 
 	AS i ON v.idVenda = i.idVenda;
@@ -423,7 +424,10 @@ END;
 GO
 
 /*================VERIFICAÇÕES PARA O CLIENTE===================*/
-CREATE TRIGGER trg_Cliente_RestritoInativoMaiorIdade
+
+/*====================Aqui sera substituido por PROCEDURE*/
+
+/*CREATE TRIGGER trg_Cliente_RestritoInativoMaiorIdade
 ON Vendas
 INSTEAD OF INSERT
 AS
@@ -483,7 +487,7 @@ BEGIN
     SELECT idCliente, DataVenda, ValorTotal
     FROM inserted;
 END;
-GO
+GO*/
 
 /*=====================================VERIFICAÇÕES DO FORNECEDOR===============================*/
 CREATE TRIGGER trg_Fornecedor_RestritoInativo_LimiteAbertura
@@ -553,7 +557,7 @@ AS BEGIN									/*Inicio do código que sera executado quando a TRIGGER for dis
     SET DataUltimaCompra = i.DataVenda		/*DataUltimaCompra será atualizado com a DataVenda vinda da tabela virtual "inserted"*/
     FROM Clientes c
     JOIN inserted i ON c.idCliente = i.idCliente; /*liga a tabela inserted com a tabela cliente, e por fim atualize apenas o cliente que fez a venda*/
-END;												 /*e por fim atualize apenas o cliente que fez a venda*/
+END;												
 GO
 
 /* ================================ATUALIZAR ULTIMO FORNECIMENTO DO FORNECEDOR======================= */
@@ -690,5 +694,70 @@ AS BEGIN
     FROM PrincipiosAtivo p
     INNER JOIN inserted i ON p.idPrincipioAt = i.idPrincipioAt
     INNER JOIN Compras c ON c.idCompra = i.idCompra;
+END;
+GO
+
+/*============UTILIZANDO PROCEDURES================*/
+
+CREATE PROCEDURE sp_RegistrarVenda
+    @idCliente INT,
+    @DataVenda DATE,
+    @Itens TABLE (CDB NUMERIC(13,0), Quantidade INT)
+AS BEGIN
+    BEGIN TRANSACTION;
+    BEGIN TRY
+
+        IF EXISTS (
+            SELECT 1
+            FROM Clientes c
+            JOIN SituacaoClientes st ON c.Situacao = s.id
+            WHERE c.idCliente = @idCliente AND st.Situacao = 'I'
+        )
+        BEGIN
+            THROW 50001, 'Cliente inativo — venda não permitida.', 1;
+        END;
+
+        IF EXISTS (SELECT 1 
+        FROM ClientesRestritos 
+        WHERE idCliente = @idCliente)
+        BEGIN
+            THROW 50002, 'Cliente restrito — venda não permitida.', 1;
+        END;
+
+        IF EXISTS (
+            SELECT 1
+            FROM Clientes
+            WHERE idCliente = @idCliente
+            AND DATEDIFF(YEAR, DataNasc, GETDATE()) -
+                CASE 
+                    WHEN MONTH(DataNasc) > MONTH(GETDATE()) 
+                         OR (MONTH(DataNasc) = MONTH(GETDATE()) AND DAY(DataNasc) > DAY(GETDATE()))
+                    THEN 1
+                    ELSE 0
+                END < 18
+        )
+        BEGIN
+            THROW 50003, 'Cliente menor de idade — venda não permitida.', 1;
+        END;
+
+        -----Criando a venda
+        INSERT INTO Vendas (idCliente, DataVenda, ValorTotal)
+        VALUES (@idCliente, @DataVenda, 0);
+
+        DECLARE @idVenda INT = SCOPE_IDENTITY();
+
+        ----inserindo itens
+        INSERT INTO ItensVendas (idVenda, CDB, Quantidade, ValorUnitario)
+        SELECT @idVenda, i.CDB, i.Quantidade, m.ValorVenda
+        FROM @Itens i
+        JOIN Medicamentos m ON m.CDB = i.CDB;
+
+        COMMIT TRANSACTION;
+        PRINT 'Venda registrada com sucesso!';
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
 END;
 GO

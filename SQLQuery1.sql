@@ -226,9 +226,11 @@ ORDER BY m.Nome;
 SELECT 
     p.idProducao, p.DataProducao, m.Nome AS Medicamento, p.Quantidade AS Qtd_Medicamento,
     pa.Nome AS PrincipioAtivo, itp.Quantidade AS Qtd_Principio
-FROM Producoes p
-JOIN Medicamentos m 
-ON p.CDB = m.CDB
+
+FROM Producoes p			
+JOIN Medicamentos m		/*junta cada linha da tabela Producoes com a tabela Medicamentos quando o campo CDB for igual em ambas.*/
+ON p.CDB = m.CDB		
+
 JOIN ItensProducoes itp 
 ON p.idProducao = itp.idProducao
 JOIN PrincipiosAtivo pa 
