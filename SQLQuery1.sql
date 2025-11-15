@@ -341,3 +341,7 @@ JOIN Fornecedores f
 ON c.idFornecedor = f.idFornecedor
 GROUP BY f.idFornecedor, f.RazaoSocial
 ORDER BY "Total Unidades Compradas" DESC;
+
+
+
+
