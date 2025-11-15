@@ -1,3 +1,6 @@
+USE SneezePharma
+GO
+
 ------------------------------------------------------SITUAÇÃO CLIENTE------------------------------------------------------
 
 INSERT INTO SituacaoClientes (Situacao) VALUES
@@ -51,23 +54,30 @@ SELECT * FROM CategoriasMed
 ('Cristiano Ronaldo', '14785236974', '1980-05-12', NULL, '2023-06-12', 1);		
 
 INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situacao) VALUES
-('Everton Tiru', '53610822694', '2001-07-22', NULL, '2025-11-09', 1);
+('Everton Tiru', '53610822694', '2001-07-22', NULL, '2025-11-09', 1);*/
 
-SELECT * FROM Clientes;*/
+SELECT * FROM Clientes;
 
 EXEC sp_CadastrarCliente
-    @Nome = 'Christian Kevelyn',
-    @CPF  = '53610828803',
-    @DataNasc = '2003-02-28',
-    @Situacao = 1;
+'Christian Kevelyn',
+'53610828803',
+'2003-02-28',
+1
+
+EXEC sp_CadastrarCliente
+'Neymar Junior',
+'12345678901',
+'2009-08-20',
+1
+
 
 
 ------------------------------------------------------TELEFONE------------------------------------------------------
 
 INSERT INTO Telefones (idCliente, CodPais, CodArea, Numero) VALUES
 (2, 55, 16, '999929938'),
-(3, 55, 11, '997894561'),
-(4, 55, 19, '991234567'),									
+--(3, 55, 11, '997894561'),
+--(4, 55, 19, '991234567'),									
 (1, 55, 13, '991597538');
 
 SELECT * FROM Telefones
@@ -80,33 +90,42 @@ SELECT * FROM Telefones
 ('98765432000111', 'MaisSaude', 'Brasil', '2016-03-16', 2, NULL, '2019-05-14'),
 ('96385214000178', 'DrogariaMedicinal', 'Brasil', '2019-10-08', 1, NULL, '2020-06-27'),				
 ('74185296000133', 'RemediariaMais', 'Brasil', '2018-02-14', 1, NULL, '2020-06-27'),
-('35795184200016', 'DrogariaSaude', 'Brasil', '2017-08-22', 1, NULL, '2020-06-27');
+('35795184200016', 'DrogariaSaude', 'Brasil', '2017-08-22', 1, NULL, '2020-06-27');*/
 
-SELECT * FROM Fornecedores;*/
+SELECT * FROM Fornecedores;
 
 EXEC sp_CadastrarFornecedor 
-    @CNPJ = '12345678000199',
-    @RazaoSocial = 'Novo Fornecedor',
-    @Pais = 'Brasil',
-    @DataAbertura = '2020-01-15',
-    @Situacao = 1,
-    @DataCadastro = '2025-02-12';
+'12345678000199',
+'Novo Fornecedor',
+'Brasil',
+'2020-01-15',
+1
+
+EXEC sp_CadastrarFornecedor 
+'74185296000133',
+'RemediariaMais',
+'Brasil',
+'2017-08-22',
+1
 
 ----------------------------------------------CLIENTES RESTRITOS-----------------------------------------------
-
+/*
 INSERT INTO ClientesRestritos (idCliente) VALUES
 
 (5);							
 
 SELECT * FROM ClientesRestritos;
+*/
 
 ----------------------------------------------FORNECEDORES RESTRITOS-----------------------------------------------
 
+/*
 INSERT INTO FornecedoresRestritos (idFornecedor) VALUES
 
 (3);			
 
 SELECT * FROM FornecedoresRestritos;
+*/
 
 ------------------------------------------------------PRINCIPIOS ATIVOS------------------------------------------------------
 										/*DataUltimaCompra = DataCompra Comora*/
@@ -115,13 +134,17 @@ SELECT * FROM FornecedoresRestritos;
 ('Principio1', 2, NULL, '2015-02-20'),
 ('Principio2', 1, NULL, '2016-03-21'),
 ('Principio3', 1, NULL, '2017-04-22'),									
-('Principio4', 1, NULL, '2018-05-23');
+('Principio4', 1, NULL, '2018-05-23');*/
 
-SELECT * FROM PrincipiosAtivo;*/
+SELECT * FROM PrincipiosAtivo;
 
 EXEC sp_CadastrarPrincipioAtivo
-    @Nome = 'Principio1',
-    @Situacao = 1;
+'Principio1',
+1;
+
+EXEC sp_CadastrarPrincipioAtivo
+'Principio2',
+1;
 
 ------------------------------------------------------MEDICAMENTOS------------------------------------------------------			
 
@@ -131,21 +154,28 @@ EXEC sp_CadastrarPrincipioAtivo
 ('1472583691598', '25.00', 'Nelsaldina', NULL, '2010-10-30', 1, 1),				
 ('1597536984562', '50.00', 'Paracetamol', NULL, '2011-09-29', 1, 2),	
 ('7896321475395', '100.00', 'Dorflex', NULL, '2011-08-28', 1, 3),
-('3698741235795', '200.00', 'Dramim', NULL, '2011-07-27', 2, 4);
+('3698741235795', '200.00', 'Dramim', NULL, '2011-07-27', 2, 4);*/
 
-SELECT * FROM Medicamentos;*/
+SELECT * FROM Medicamentos;
 
 EXEC sp_CadastrarMedicamento
-    @CDB = '1472583691598',
-    @ValorVenda = 12.00,
-    @Nome = 'Nelsaldina',
-    @Situacao = 1,
-    @Categoria = 2;
+'1472583691598',
+12.00,
+'Nelsaldina',
+1,
+2;
+
+EXEC sp_CadastrarMedicamento
+'7896321475395',
+100.00,
+'Dorflex',
+1,
+3;
 
 ------------------------------------------------------VENDAS------------------------------------------------------
 
 				/*ValorTotal = Soma de TotalItemVenda*/
-INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES	/*Atributo idCliente sendo informado*/
+/*INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES	/*Atributo idCliente sendo informado*/
 (3, '2025-03-11', NULL),
 (4, '2025-04-12', NULL);					
 
@@ -156,13 +186,26 @@ INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES    /*Cliente menor 
 (2, '2025-02-10', NULL);
 
 INSERT INTO Vendas (idCliente, DataVenda, ValorTotal) VALUES    /*Cliente Restrito*/
-(5, '2025-08-20', NULL);
+(5, '2025-08-20', NULL);*/
 
 SELECT * FROM Vendas;
 
+EXEC sp_CadastrarVenda 
+1,
+'1472583691598',
+2,
+'7896321475395', 2
+
+
+EXEC sp_CadastrarVenda 
+1,
+'7896321475395',
+2,
+1
+
 ----------------------------------------------------ITENS VENDA------------------------------------------------------	
 
-/*ValorUnitario = ValorVenda Medicamento*/ /*TotalItem = Qntd * ValorUnitario*/
+/*/*ValorUnitario = ValorVenda Medicamento*/ /*TotalItem = Qntd * ValorUnitario*/
 INSERT INTO ItensVendas (Quantidade, idVenda, CDB, ValorUnitario) VALUES
 /*idVenda e CDB sendo trazidos*/
 
@@ -171,14 +214,14 @@ INSERT INTO ItensVendas (Quantidade, idVenda, CDB, ValorUnitario) VALUES
 (3, 2, '7896321475395', NULL);	/*TotalItem esta como NULL pois o valorUnitario precisa vim de valor venda*/
 
 INSERT INTO ItensVendas (Quantidade, idVenda, CDB, ValorUnitario) VALUES
-(5, 4, '3698741235795', NULL);      /*Medicamento Inativo*/
+(5, 4, '3698741235795', NULL); */     /*Medicamento Inativo*/
 
 SELECT * FROM ItensVendas
 
 ------------------------------------------------------COMPRAS------------------------------------------------------
 
 						/*ValorTotal = Soma TotalItemCompra*/
-INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES	/*Atributo IdFornecedor sendo atribuido aqui*/
+/*INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES	/*Atributo IdFornecedor sendo atribuido aqui*/
 
 (4, '2025-09-11', NULL),
 (5, '2025-08-12', NULL),	
@@ -191,13 +234,25 @@ INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES
 (2, '2025-07-13', NULL);  /*INATIVO*/
 
 INSERT INTO Compras (idFornecedor, DataCompra, ValorTotal) VALUES
-(1, '2025-10-10', NULL); /*MENOS DE 2 ANOS DE ABERTURA*/
+(1, '2025-10-10', NULL);*/    /*MENOS DE 2 ANOS DE ABERTURA*/
+
+EXEC sp_CadastrarCompra
+1,
+1,
+3,
+15.00, 2, 1, 5.00
+
+EXEC sp_CadastrarCompra
+2,
+1,
+3,
+20.00
 
 SELECT * FROM Compras;
 
 ---------------------------------------------------ITENS DE COMPRA---------------------------------------------------	
 
-/*TotalItem = Quantidade * ValorUnitario*/
+/*/*TotalItem = Quantidade * ValorUnitario*/
 INSERT INTO ItensCompras (idCompra, idPrincipioAt, Quantidade, ValorUnitario) VALUES
 /*Atributo IdCompra sendo atribuido aqui, IdPrincipioAtivo Tambem*/
 
@@ -205,32 +260,44 @@ INSERT INTO ItensCompras (idCompra, idPrincipioAt, Quantidade, ValorUnitario) VA
 (3, 3, 4, '20.00');		/*Aqui total item ja está calculando*/
 
 INSERT INTO ItensCompras (idCompra, idPrincipioAt, Quantidade, ValorUnitario) VALUES
-(1, 1, 2, '5.00');			/*Principio Inativo*/
+(1, 1, 2, '5.00');*/			/*Principio Inativo*/
 
 SELECT * FROM ItensCompras;
 
 ------------------------------------------------------PRODUÇÃO------------------------------------------------------
 
-INSERT INTO Producoes (DataProducao, CDB, Quantidade) VALUES	/*CDB sendo trazido*/
+/*INSERT INTO Producoes (DataProducao, CDB, Quantidade) VALUES	/*CDB sendo trazido*/
 
 ('2025-01-01', '1472583691598', 5),
 ('2025-02-02', '1597536984562', 10),
 ('2025-03-03', '7896321475395', 15);					
 
 INSERT INTO Producoes (DataProducao, CDB, Quantidade) VALUES    /*Medicamento INATIVO*/
-('2025-02-02', '3698741235795', 20);
+('2025-02-02', '3698741235795', 20);*/
+
+EXEC sp_Producao 
+'1472583691598',
+1,
+2,
+10
+
+EXEC sp_Producao 
+'7896321475395',
+2,
+5,
+20
 
 SELECT * FROM Producoes;
 
 ------------------------------------------------------ITENS DA PRODUÇÃO-------------------------------------------------
 
-INSERT INTO ItensProducoes (idProducao, idPrincipioAt, Quantidade) VALUES	/*Atribuindo IdProdução e IdPrincipioAtivo*/
+/*INSERT INTO ItensProducoes (idProducao, idPrincipioAt, Quantidade) VALUES	/*Atribuindo IdProdução e IdPrincipioAtivo*/
 
 (2, 2, 15),
 (3, 3, 10);
 
 INSERT INTO ItensProducoes (idProducao, idPrincipioAt, Quantidade) VALUES	/*Atribuindo IdProdução e IdPrincipioAtivo*/			
-(1, 1, 20);	/*Principio Inativo*/
+(1, 1, 20);*/	/*Principio Inativo*/
 
 SELECT * FROM ItensProducoes;
 

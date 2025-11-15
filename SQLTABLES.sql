@@ -439,12 +439,12 @@ AS BEGIN
             THROW 50001, 'Principio Ativo nao encontrado.', 1;
 
 
-        INSERT INTO Producoes (DataProducao)
-        VALUES (GETDATE());
+        INSERT INTO Producoes (DataProducao, CDB, Quantidade)
+        VALUES (GETDATE(), @CDB, @QntItensProducoes);
 
         SET @idProducao = SCOPE_IDENTITY();
 
-        EXEC sp_ItensProducoes @CDB, @idPrincipioAt, @QntPrincipioAt;
+        EXEC sp_ItensProducoes @idProducao, @idPrincipioAt, @QntPrincipioAt;
 
         COMMIT TRAN;
 
