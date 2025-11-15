@@ -425,9 +425,9 @@ GO
 
 /*================VERIFICAÇÕES PARA O CLIENTE===================*/
 
-/*====================Aqui sera substituido por PROCEDURE*/
 
-/*CREATE TRIGGER trg_Cliente_RestritoInativoMaiorIdade
+
+CREATE TRIGGER trg_Cliente_RestritoInativoMaiorIdade
 ON Vendas
 INSTEAD OF INSERT
 AS
@@ -487,7 +487,7 @@ BEGIN
     SELECT idCliente, DataVenda, ValorTotal
     FROM inserted;
 END;
-GO*/
+GO
 
 /*=====================================VERIFICAÇÕES DO FORNECEDOR===============================*/
 CREATE TRIGGER trg_Fornecedor_RestritoInativo_LimiteAbertura
@@ -697,67 +697,249 @@ AS BEGIN
 END;
 GO
 
-/*============UTILIZANDO PROCEDURES================*/
+/*========================================================UTILIZANDO PROCEDURES============================================================*/
 
-CREATE PROCEDURE sp_RegistrarVenda
-    @idCliente INT,
-    @DataVenda DATE,
-    @Itens TABLE (CDB NUMERIC(13,0), Quantidade INT)
+/*==========CADASTRO DE CLIENTE=============*/
+CREATE OR ALTER PROCEDURE sp_CadastrarCliente       /*criando a procedure assim, ela pode ser modificada, sem precisar excluir e criar dnv*/
+(@Nome            VARCHAR(50),
+ @CPF             CHAR(11),
+ @DataNasc        DATE,
+ @Situacao        INT,      
+ @DataCadastro    DATE = NULL)
 AS BEGIN
-    BEGIN TRANSACTION;
+
+    IF @DataCadastro IS NULL
+        SET @DataCadastro = GETDATE();
+
     BEGIN TRY
+        BEGIN TRANSACTION;
 
-        IF EXISTS (
-            SELECT 1
-            FROM Clientes c
-            JOIN SituacaoClientes st ON c.Situacao = s.id
-            WHERE c.idCliente = @idCliente AND st.Situacao = 'I'
-        )
+        --Valida se existe CPF
+
+        IF EXISTS (SELECT 1 FROM Clientes WHERE CPF = @CPF)
         BEGIN
-            THROW 50001, 'Cliente inativo — venda não permitida.', 1;
+            THROW 60001, 'CPF já cadastrado para outro cliente.', 1;
         END;
 
-        IF EXISTS (SELECT 1 
-        FROM ClientesRestritos 
-        WHERE idCliente = @idCliente)
+        --Valida se a situação é valida
+
+        IF NOT EXISTS (SELECT 1 FROM SituacaoClientes WHERE id = @Situacao)
         BEGIN
-            THROW 50002, 'Cliente restrito — venda não permitida.', 1;
+            THROW 60002, 'Situação informada não existe.', 1;
         END;
 
-        IF EXISTS (
-            SELECT 1
-            FROM Clientes
-            WHERE idCliente = @idCliente
-            AND DATEDIFF(YEAR, DataNasc, GETDATE()) -
-                CASE 
-                    WHEN MONTH(DataNasc) > MONTH(GETDATE()) 
-                         OR (MONTH(DataNasc) = MONTH(GETDATE()) AND DAY(DataNasc) > DAY(GETDATE()))
-                    THEN 1
-                    ELSE 0
-                END < 18
-        )
+        --Inserindo o cliente
+
+        INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situacao)
+        VALUES (@Nome, @CPF, @DataNasc, NULL, @DataCadastro, @Situacao);
+
+        --Recupera o ID criado
+        DECLARE @NovoID INT;
+
+        SET @NovoID = SCOPE_IDENTITY();
+
+        COMMIT TRANSACTION;     /*confirma o que foi feito e grava no banco*/
+
+        /*Retorna o ID criado*/
+        SELECT @NovoID AS idCliente;
+
+    END TRY
+    BEGIN CATCH     
+        ROLLBACK TRANSACTION;       /*se algo deu errado, desfaz tudo*/
+
+        DECLARE @Msg NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @Num INT = ERROR_NUMBER();
+
+        THROW @Num, @Msg, 1;        /*mostrando o erro*/
+    END CATCH
+END;
+GO
+
+/*=========CADASTRO DE FORNECEDORES=============*/
+
+CREATE OR ALTER PROCEDURE sp_CadastrarFornecedor
+(@CNPJ CHAR(14),
+ @RazaoSocial VARCHAR(50),
+ @Pais VARCHAR(20),
+ @DataAbertura DATE,
+ @Situacao INT,
+ @DataCadastro DATE)
+
+AS BEGIN
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        --Valida se existe CNPJ
+
+        IF EXISTS (SELECT 1 FROM Fornecedores WHERE CNPJ = @CNPJ)
         BEGIN
-            THROW 50003, 'Cliente menor de idade — venda não permitida.', 1;
+            THROW 52001, 'Já existe um fornecedor cadastrado com este CNPJ.', 1;
         END;
 
-        -----Criando a venda
-        INSERT INTO Vendas (idCliente, DataVenda, ValorTotal)
-        VALUES (@idCliente, @DataVenda, 0);
 
-        DECLARE @idVenda INT = SCOPE_IDENTITY();
+        --Valida se a situação é valida
 
-        ----inserindo itens
-        INSERT INTO ItensVendas (idVenda, CDB, Quantidade, ValorUnitario)
-        SELECT @idVenda, i.CDB, i.Quantidade, m.ValorVenda
-        FROM @Itens i
-        JOIN Medicamentos m ON m.CDB = i.CDB;
+        IF NOT EXISTS (SELECT 1 FROM SituacaoFornecedores WHERE id = @Situacao)
+        BEGIN
+            THROW 52002, 'Situação de fornecedor inválida.', 1;
+        END;
+
+  
+        --Inserindo o fornecedor
+
+        INSERT INTO Fornecedores 
+            (CNPJ, RazaoSocial, Pais, DataAbertura, Situacao, UltimoFornecimento, DataCadastro)
+        VALUES 
+            (@CNPJ, @RazaoSocial, @Pais, @DataAbertura, @Situacao, NULL, @DataCadastro);
+
+        DECLARE @NovoID INT;
+
+        SET @NovoID = SCOPE_IDENTITY();
 
         COMMIT TRANSACTION;
-        PRINT 'Venda registrada com sucesso!';
+
+        SELECT @NovoID AS idFornecedor;
+
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+
+        DECLARE @Msg NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @Num INT = ERROR_NUMBER();
+
+        THROW @Num, @Msg, 1;
     END CATCH
+END;
+GO
+
+
+/*======CADASTRO DE PRINCIPIOS ATIVOS=======*/
+
+/*Ids estão sendo gerados aut. e ultima compra inicia com null e é atualizada pela trigger*/
+
+CREATE OR ALTER PROCEDURE sp_CadastrarPrincipioAtivo
+(@Nome           VARCHAR(20),
+ @Situacao       INT,           
+ @DataCadastro   DATE = NULL)   
+
+AS BEGIN
+
+    IF @DataCadastro IS NULL
+        SET @DataCadastro = GETDATE();
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        --Valida se o nome existe
+
+        IF EXISTS (SELECT 1 FROM PrincipiosAtivo WHERE Nome = @Nome)
+        BEGIN
+            THROW 62001, 'Já existe um princípio ativo com esse nome.', 1;
+        END;
+
+
+        --Valida a situação
+
+        IF NOT EXISTS (SELECT 1 FROM SituacaoPrincipiosAtivo WHERE id = @Situacao)
+        BEGIN
+            THROW 62002, 'Situação informada não existe.', 1;
+        END;
+
+  
+        --Inserindo o principio ativo
+  
+        INSERT INTO PrincipiosAtivo (Nome, Situacao, DataUltimaCompra, DataCadastro)
+        VALUES (@Nome, @Situacao, NULL, @DataCadastro);
+
+        DECLARE @NovoID INT;
+
+        SET @NovoID = SCOPE_IDENTITY();
+
+        COMMIT TRANSACTION;
+
+        SELECT @NovoID AS idPrincipioAtivo;
+
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+
+        DECLARE @Msg NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @Num INT = ERROR_NUMBER();
+
+        THROW @Num, @Msg, 1;
+    END CATCH
+END;
+GO
+
+
+/*======CADASTRO DE MEDICAMENTO========*/
+
+CREATE OR ALTER PROCEDURE sp_CadastrarMedicamento
+(@CDB           NUMERIC(13,0),
+ @ValorVenda    DECIMAL(6,2),
+ @Nome          VARCHAR(40),
+ @Situacao      INT,        
+ @Categoria     INT,       
+ @DataCadastro  DATE = NULL)
+
+AS BEGIN
+
+    IF @DataCadastro IS NULL
+        SET @DataCadastro = GETDATE();
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+
+        --Valida se o CDB existe
+
+        IF EXISTS (SELECT 1 FROM Medicamentos WHERE CDB = @CDB)
+        BEGIN
+            THROW 61001, 'Já existe um medicamento cadastrado com este CDB.', 1;
+        END;
+
+
+        --Valida a situação
+
+        IF NOT EXISTS (SELECT 1 FROM SituacaoMed WHERE id = @Situacao)
+        BEGIN
+            THROW 61002, 'Situação informada não existe na tabela SituacaoMed.', 1;
+        END;
+
+        --Valida se a categoria existe
+
+        IF NOT EXISTS (SELECT 1 FROM CategoriasMed WHERE id = @Categoria)
+        BEGIN
+            THROW 61003, 'Categoria informada não existe na tabela CategoriasMed.', 1;
+        END;
+
+
+        --Valida valor positivo
+
+        IF @ValorVenda <= 0
+        BEGIN
+            THROW 61004, 'O valor de venda deve ser maior que zero.', 1;
+        END;
+
+
+        --Insere o medicamento
+
+        INSERT INTO Medicamentos (CDB, ValorVenda, Nome, UltimaVenda, DataCadastro, Situacao, Categoria)
+        VALUES (@CDB, @ValorVenda, @Nome, NULL, @DataCadastro, @Situacao, @Categoria);
+
+        COMMIT TRANSACTION;
+
+        SELECT @CDB AS CDB;
+
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+
+        DECLARE @Msg NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @Num INT = ERROR_NUMBER();
+
+        THROW @Num, @Msg, 1;
+    END CATCH;
 END;
 GO

@@ -43,7 +43,7 @@ SELECT * FROM CategoriasMed
 ------------------------------------------------------CLIENTES------------------------------------------------------
 											
 										/*DataUltimaCompra = DataVenda Venda*/
-INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situacao) VALUES
+/*INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situacao) VALUES
 
 ('Christian Kevelyn', '53610828803', '2003-02-28', NULL, '2020-02-15', 2),
 ('Neymar Junior', '12345678901', '2009-08-20', NULL, '2021-03-16', 1),
@@ -53,7 +53,14 @@ INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situa
 INSERT INTO Clientes (Nome, CPF, DataNasc, DataUltimaCompra, DataCadastro, Situacao) VALUES
 ('Everton Tiru', '53610822694', '2001-07-22', NULL, '2025-11-09', 1);
 
-SELECT * FROM Clientes;
+SELECT * FROM Clientes;*/
+
+EXEC sp_CadastrarCliente
+    @Nome = 'Christian Kevelyn',
+    @CPF  = '53610828803',
+    @DataNasc = '2003-02-28',
+    @Situacao = 1;
+
 
 ------------------------------------------------------TELEFONE------------------------------------------------------
 
@@ -67,7 +74,7 @@ SELECT * FROM Telefones
 
 ------------------------------------------------------FORNECEDORES------------------------------------------------------
 																/*UltimoFornecimento Recebe de UltimaCompra*/
-INSERT INTO Fornecedores (CNPJ, RazaoSocial, Pais, DataAbertura, Situacao, UltimoFornecimento, DataCadastro) VALUES
+/*INSERT INTO Fornecedores (CNPJ, RazaoSocial, Pais, DataAbertura, Situacao, UltimoFornecimento, DataCadastro) VALUES
 
 ('12345678000199', 'MedicinaSaude', 'Brasil', '2024-02-15', 1, NULL , '2018-04-02'),
 ('98765432000111', 'MaisSaude', 'Brasil', '2016-03-16', 2, NULL, '2019-05-14'),
@@ -75,7 +82,15 @@ INSERT INTO Fornecedores (CNPJ, RazaoSocial, Pais, DataAbertura, Situacao, Ultim
 ('74185296000133', 'RemediariaMais', 'Brasil', '2018-02-14', 1, NULL, '2020-06-27'),
 ('35795184200016', 'DrogariaSaude', 'Brasil', '2017-08-22', 1, NULL, '2020-06-27');
 
-SELECT * FROM Fornecedores;
+SELECT * FROM Fornecedores;*/
+
+EXEC sp_CadastrarFornecedor 
+    @CNPJ = '12345678000199',
+    @RazaoSocial = 'Novo Fornecedor',
+    @Pais = 'Brasil',
+    @DataAbertura = '2020-01-15',
+    @Situacao = 1,
+    @DataCadastro = '2025-02-12';
 
 ----------------------------------------------CLIENTES RESTRITOS-----------------------------------------------
 
@@ -95,26 +110,37 @@ SELECT * FROM FornecedoresRestritos;
 
 ------------------------------------------------------PRINCIPIOS ATIVOS------------------------------------------------------
 										/*DataUltimaCompra = DataCompra Comora*/
-INSERT INTO PrincipiosAtivo (Nome, Situacao, DataUltimaCompra, DataCadastro) VALUES
+/*INSERT INTO PrincipiosAtivo (Nome, Situacao, DataUltimaCompra, DataCadastro) VALUES
 
 ('Principio1', 2, NULL, '2015-02-20'),
 ('Principio2', 1, NULL, '2016-03-21'),
 ('Principio3', 1, NULL, '2017-04-22'),									
 ('Principio4', 1, NULL, '2018-05-23');
 
-SELECT * FROM PrincipiosAtivo;
+SELECT * FROM PrincipiosAtivo;*/
+
+EXEC sp_CadastrarPrincipioAtivo
+    @Nome = 'Principio1',
+    @Situacao = 1;
 
 ------------------------------------------------------MEDICAMENTOS------------------------------------------------------			
 
 							/*ValorVenda = ValorUnitario*/	/*UltimaVenda = DataVenda Venda*/
-INSERT INTO Medicamentos (CDB, ValorVenda, Nome, UltimaVenda, DataCadastro, Situacao, Categoria) VALUES
+/*INSERT INTO Medicamentos (CDB, ValorVenda, Nome, UltimaVenda, DataCadastro, Situacao, Categoria) VALUES
 
 ('1472583691598', '25.00', 'Nelsaldina', NULL, '2010-10-30', 1, 1),				
 ('1597536984562', '50.00', 'Paracetamol', NULL, '2011-09-29', 1, 2),	
 ('7896321475395', '100.00', 'Dorflex', NULL, '2011-08-28', 1, 3),
 ('3698741235795', '200.00', 'Dramim', NULL, '2011-07-27', 2, 4);
 
-SELECT * FROM Medicamentos;
+SELECT * FROM Medicamentos;*/
+
+EXEC sp_CadastrarMedicamento
+    @CDB = '1472583691598',
+    @ValorVenda = 12.00,
+    @Nome = 'Nelsaldina',
+    @Situacao = 1,
+    @Categoria = 2;
 
 ------------------------------------------------------VENDAS------------------------------------------------------
 
@@ -209,7 +235,7 @@ INSERT INTO ItensProducoes (idProducao, idPrincipioAt, Quantidade) VALUES	/*Atri
 SELECT * FROM ItensProducoes;
 
 
------------------------------------FAZENDO AS JOINS--------------------------
+/*===================================================FAZENDO AS JOINS==============================================================*/
 
 /*==============MEDICAMENTOS: Categoria, Situação=================*/
 
